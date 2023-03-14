@@ -27,8 +27,8 @@ DECLARE
     nb_occurrences INTEGER := 0;
 BEGIN
     sous_chaine := substr(chaine, debut, fin - debut + 1);
-    nb_occurrences := length(sous_chaine) - length(replace(sous_chaine, caractere, ''));
-    RETURN nb_occurrences;
+        nb_occurrences := length(sous_chaine) - length(replace(sous_chaine, caractere, ''));
+        RETURN nb_occurrences;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -41,11 +41,20 @@ DECLARE
     i INTEGER;
 BEGIN
     chaine_array := string_to_array(chaine, NULL);
-    FOR i IN debut..fin LOOP
-        IF chaine_array[i] = caractere THEN
-            nb_occurrences := nb_occurrences + 1;
-        END IF;
-    END LOOP;
+    IF debut < fin
+    AND fin < length(chaine)
+    THEN    
+        FOR i IN debut..fin LOOP
+        
+            IF chaine_array[i] = caractere THEN
+                nb_occurrences := nb_occurrences + 1;
+            END IF;
+        END LOOP;
+    ELSE 
+        RAISE INFO 'Intervalle Incorrecte' ;
+        return 0 ;
+    END IF;    
+    
     RETURN nb_occurrences;
 END;
 $$ LANGUAGE plpgsql;
@@ -58,15 +67,22 @@ DECLARE
     nb_occurrences INTEGER := 0;
     i INTEGER := debut;
 BEGIN
-    LOOP
-        IF i > fin THEN
-            EXIT;
-        END IF;
-        IF substring(chaine from i for 1) = caractere THEN
-            nb_occurrences := nb_occurrences + 1;
-        END IF;
-        i := i + 1;
-    END LOOP;
+    IF debut < fin 
+    AND fin < length(chaine)
+    THEN      
+        LOOP
+            IF i > fin THEN
+                EXIT;
+            END IF;
+            IF substring(chaine from i for 1) = caractere THEN
+                nb_occurrences := nb_occurrences + 1;
+            END IF;
+            i := i + 1;
+        END LOOP;
+    ELSE 
+        RAISE INFO 'Intervalle Incorrecte' ;
+        return 0 ;
+    END IF; 
     RETURN nb_occurrences;
 END;
 $$ LANGUAGE plpgsql;
@@ -80,13 +96,20 @@ DECLARE
     i INTEGER := debut;
     car CHAR;
 BEGIN
-    WHILE i <= fin LOOP
-        car := substring(chaine from i for 1);
-        IF car = caractere THEN
-            nb_occurrences := nb_occurrences + 1;
-        END IF;
-        i := i + 1;
-    END LOOP;
+    IF debut < fin 
+    AND fin < length(chaine)
+    THEN
+        WHILE i <= fin LOOP
+            car := substring(chaine from i for 1);
+            IF car = caractere THEN
+                nb_occurrences := nb_occurrences + 1;
+            END IF;
+            i := i + 1;
+        END LOOP;
+    ELSE 
+        RAISE INFO 'Intervalle Incorrecte' ;
+        return 0 ;
+    END IF; 
     RETURN nb_occurrences;
 END;
 $$ LANGUAGE plpgsql;
@@ -113,3 +136,9 @@ $$ LANGUAGE plpgsql;
 SELECT getNbJoursParMois('2022-02-01'); -- renvoie 28
 
 /* Fin Nombre de Jours Fin */
+
+/* Dates au format FR */
+
+
+
+/* Fin Dates au format FR Fin */

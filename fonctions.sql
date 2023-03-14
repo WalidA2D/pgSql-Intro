@@ -54,7 +54,6 @@ BEGIN
         RAISE INFO 'Intervalle Incorrecte' ;
         return 0 ;
     END IF;    
-    
     RETURN nb_occurrences;
 END;
 $$ LANGUAGE plpgsql;
@@ -128,10 +127,20 @@ RETURNS integer AS $$
 DECLARE
     nb_jours integer;
 BEGIN
-    nb_jours := EXTRACT(DAY FROM (DATE_TRUNC('month', date_param) + INTERVAL '1 month - 1 day'));
+    IF (EXTRACT(MONTH FROM date_param) = 2) THEN
+        IF (EXTRACT(YEAR FROM date_param) % 4 = 0 AND (EXTRACT(YEAR FROM date_param) % 100 != 0 OR EXTRACT(YEAR FROM date_param) % 400 = 0)) THEN
+            nb_jours := 29;
+        ELSE
+            nb_jours := 28;
+        END IF;
+    ELSE
+        nb_jours := EXTRACT(DAY FROM (DATE_TRUNC('month', date_param) + INTERVAL '1 month - 1 day'));
+    END IF;
+
     RETURN nb_jours;
 END;
 $$ LANGUAGE plpgsql;
+
 
 SELECT getNbJoursParMois('2022-02-01'); -- renvoie 28
 
